@@ -101,8 +101,93 @@ Given a broken script that fits a scaler on train+test data:
 - Rewrite using `sklearn.Pipeline`
 - Compare metrics: leaky model vs. clean model
 
-### Activity 3 — CV Fold Visualization (code)
-Build a matplotlib grid showing 5-fold TimeSeriesSplit with color-coded train/test blocks
+### Activity 3 — ML Sample Activity: Predict Loan Default Without Leakage (20 min)
+Use the following business case to practice the full data quality workflow:
+
+#### Scenario
+A bank wants to predict whether a borrower will default on a loan within the next 30 days.
+
+You have a data table with fields such as:
+- `customer_id`
+- `loan_amount`
+- `annual_income`
+- `employment_years`
+- `credit_score`
+- `days_since_last_payment`
+- `existing_loans`
+- `loan_approval_date`
+- `defaulted_in_next_30_days`
+
+#### Exercise
+1. Split the data by time, not randomly.
+2. Build a simple baseline model using `LogisticRegression`.
+3. Identify at least one leakage feature.
+4. Rebuild the model using a leakage-free `Pipeline`.
+5. Compare the model performance before and after fixing the leak.
+
+#### Example of the leak
+A feature such as `days_to_default` or a post-approval status flag is not available at prediction time and should never be used to train the model. If you include it, the model will look unrealistically good because it is effectively seeing the answer.
+
+#### Example implementation
+```python
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, roc_auc_score
+
+# Example: historical loan data
+# Assume defaulted_in_next_30_days is the target
+X = df.drop(columns=['customer_id', 'defaulted_in_next_30_days'])
+y = df['defaulted_in_next_30_days']
+
+# Bad approach: random split + leakage feature still present
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Leaky feature example: training on a variable that only exists after the loan outcome
+# For example, 'payment_status_after_30_days' or 'loan_outcome_label'
+# would create target leakage.
+
+numeric_features = ['loan_amount', 'annual_income', 'credit_score', 'employment_years']
+categorical_features = ['loan_type', 'region']
+
+preprocessor = ColumnTransformer([
+    ('num', Pipeline([
+        ('imputer', SimpleImputer(strategy='median')),
+        ('scaler', StandardScaler())
+    ]), numeric_features),
+    ('cat', Pipeline([
+        ('imputer', SimpleImputer(strategy='most_frequent')),
+        ('encoder', OneHotEncoder(handle_unknown='ignore'))
+    ]), categorical_features)
+])
+
+model = Pipeline([
+    ('preprocessor', preprocessor),
+    ('classifier', LogisticRegression(max_iter=1000))
+])
+
+model.fit(X_train, y_train)
+preds = model.predict(X_test)
+print(classification_report(y_test, preds))
+print('AUC:', roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]))
+```
+
+#### Explanation
+This activity teaches the core idea behind leakage-free modelling:
+
+- The model must only learn from information available at the time the prediction is made.
+- If a feature is only known after the outcome occurs, it is leakage.
+- Random splitting is dangerous when the business problem is time-dependent.
+- `sklearn.Pipeline` ensures that preprocessing is fit only on the training data, preventing train/test contamination.
+- A clean model may have lower test accuracy than the leaky variant, but it is the valid one because it reflects real-world deployment.
+
+In practice, a lender should predict default for a prospective borrower using data available at application time, not data that only exists after the default has happened.
 
 ---
 
