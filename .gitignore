@@ -1,0 +1,46 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.Python
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_tmp
+
+# ── MLflow ────────────────────────────────────────────────────────────────────
+mlruns/
+mlartifacts/
+
+# ── Secrets — NEVER commit these ─────────────────────────────────────────────
+.env
+*.pem
+*.key
+
+# ── Generated chart outputs ───────────────────────────────────────────────────
+*.png
+*.jpg
+*.svg
+reports/
+models/
+
+# ── OS artifacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ── IDE configs ───────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo

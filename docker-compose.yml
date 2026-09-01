@@ -1,0 +1,53 @@
+services:
+
+  # ── Jupyter Lab (main learning environment) ───────────────────────────────
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fama-jupyter
+    ports:
+      - "8888:8888"       # JupyterLab UI
+      - "5000:5000"       # MLflow UI (Session 04 / 08)
+    volumes:
+      # Mount repo live — any edits on host appear inside container immediately
+      - .:/home/jovyan/advance-ml-fama
+      # Persist pip cache between rebuilds
+      - pip-cache:/home/jovyan/.cache/pip
+      # Persist MLflow experiment data
+      - mlflow-data:/home/jovyan/advance-ml-fama/mlruns
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - MLFLOW_TRACKING_URI=http://localhost:5000
+      # Azure credentials (fill in .env file — never commit secrets)
+      - AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID:-}
+      - AZURE_RESOURCE_GROUP=${AZURE_RESOURCE_GROUP:-}
+      - AZURE_ML_WORKSPACE=${AZURE_ML_WORKSPACE:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/api"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── MLflow Tracking Server (Sessions 04 / 08) ─────────────────────────────
+  mlflow:
+    image: python:3.11-slim
+    container_name: fama-mlflow
+    ports:
+      - "5001:5000"       # MLflow UI on host port 5001
+    volumes:
+      - mlflow-data:/mlruns
+    command: >
+      sh -c "pip install --quiet mlflow==2.14.1 &&
+             mlflow server
+               --host 0.0.0.0
+               --port 5000
+               --backend-store-uri /mlruns
+               --default-artifact-root /mlruns"
+    restart: unless-stopped
+
+volumes:
+  pip-cache:
+  mlflow-data:

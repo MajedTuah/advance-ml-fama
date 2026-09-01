@@ -1,7 +1,7 @@
 # 🧠 Topic 01 — AI, ML, DL & LLM Landscape
 > **Schedule:** Day 1 | 9:00 AM – 10:00 AM | Duration: 60 min
 > **Folder:** `day1/01_ai_ml_dl_llm_landscape/`
-> **Status:** 🔲 Pending Build
+> **Status:** ✅ Built — `day1/01_ai_ml_dl_llm_landscape/`
 
 ---
 
