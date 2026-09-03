@@ -36,7 +36,8 @@ That's it. No Python, no pip, no virtual environments.
 
 | Service | URL | Used In |
 |---------|-----|---------|
-| **JupyterLab** | http://localhost:8888 | All sessions |
+| **JupyterLab** |
+ | All sessions |
 | **MLflow UI** (standalone) | http://localhost:5001 | Sessions 04 & 08 |
 
 ---
