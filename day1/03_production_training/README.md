@@ -1,116 +1,115 @@
-# ⚙️ Session 03 — Production Model Training in One Notebook
+# ⚙️ Session 03 — Production Model Training
 
 > **Day 1 | 11:00 AM – 12:00 PM | Duration: 60 minutes**
 
 ---
 
-## 🎯 Learning Objectives
+This folder demonstrates a compact, production-style training pipeline implemented as small, testable scripts. The example is intentionally minimal so you can focus on the architecture and reproducibility aspects.
 
-By the end of this session, learners will be able to:
-1. Explain why notebooks are powerful for exploration but need structure for production.
-2. Organize ML code into clean, reusable functions inside a single notebook.
-3. Use a config dictionary and a small CLI pattern to make training reproducible.
-4. Log progress and save model artifacts without creating separate Python files.
+## What this folder contains
+
+- `scripts/main.py` — orchestration script to run the end-to-end workflow
+- `scripts/train.py` — model training and save helpers
+- `scripts/evaluate.py` — compute and save evaluation metrics
+- `scripts/features.py` — feature engineering / preprocessing
+- `scripts/data_loader.py` — dataset creation/loading and train/test split
+- `scripts/config.yaml` — configuration for the run (data paths, model params, artifact paths)
+- `notebook.ipynb` — (optional) notebook version used to teach the same pattern interactively
 
 ---
 
-## 🧠 Core Concepts
+## Goals & learning objectives
 
-### 1. Why training code needs structure
+By the end of this session learners will be able to:
+- Explain how configuration, logging and artifact management enable reproducible training runs
+- Read a small pipeline and map each step to production responsibilities (ingest, features, train, evaluate, persist)
+- Run the end-to-end script and inspect generated artifacts (model file, metrics, logs)
 
-Even inside a notebook, production-style ML should avoid hidden cell state and hard-coded values.
+---
 
-| Problem | Impact |
-|---|---|
-| Hidden state | Runs depend on execution order |
-| Hard-coded values | Hard to reproduce and tune |
-| Unclear logging | Failures are difficult to debug |
-| Monolithic cells | Code becomes hard to maintain |
+## Quick setup (recommended)
 
-### 2. Single Responsibility in a notebook
+From the repository root create and activate a virtual environment and install dependencies:
 
-Each function in the notebook should do one thing:
-- load data
-- build features
-- train the model
-- evaluate the model
-- save the artifact
-
-This keeps the notebook readable while still teaching production patterns.
-
-### 3. Configuration in a single file
-
-Instead of a separate YAML config, the notebook can keep a dictionary of params at the top.
-
-```python
-config = {
-    'target_column': 'churn',
-    'test_size': 0.2,
-    'random_state': 42,
-    'model_type': 'logistic_regression',
-    'max_iter': 500
-}
+```bash
+python -m venv .venv
+.\\.venv\\Scripts\\activate   # Windows PowerShell / CMD
+# or on macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-This is enough to teach the production principle without splitting the work across files.
+If you prefer a lightweight install for this folder you can install the minimum packages used here:
 
-### 4. Reproducibility checklist
-
-- Use a fixed random seed
-- Log parameter values
-- Save the trained model
-- Store evaluation metrics
-- Keep the notebook deterministic and runnable top-to-bottom
-
-### 5. Logging vs print
-
-`print()` is fine for quick checks, but `logging` is better for real training flows because it supports levels, files, and timestamps.
+```bash
+pip install pandas scikit-learn joblib pyyaml
+```
 
 ---
 
-## 🏋️ Activity
+## Run the pipeline (example)
 
-This session uses a single notebook to walk through a complete training workflow:
+Run the orchestrator from the repo root:
 
-1. Generate a synthetic churn dataset
-2. Split into train/test sets
-3. Define reusable functions inside the notebook
-4. Train a logistic regression model
-5. Evaluate metrics
-6. Save model and metrics locally
+```bash
+python day1/03_production_training/scripts/main.py --config day1/03_production_training/scripts/config.yaml
+```
 
-The key idea is that the same production workflow can live inside a notebook without creating script files.
+Default behaviour:
+- If the CSV at `data.path` does not exist the loader will create a small synthetic dataset.
+- Outputs are written to `artifacts/` (model.joblib, metrics.json, training.log).
 
----
-
-## 📌 What this folder contains
-
-- `notebook.ipynb` — the complete lesson and working ML pipeline
-- no separate Python files required
+Example artifacts to check after a run:
+- `artifacts/model.joblib` — trained model persisted with `joblib`
+- `artifacts/metrics.json` — JSON with accuracy, precision, recall, f1 and full classification report
+- `artifacts/training.log` — the run log (INFO level)
 
 ---
 
-## 📝 Key Takeaways
+## `scripts/config.yaml` — fields explained
 
-- A notebook can still follow production patterns without being split into many files.
-- Good ML code is structured, parameterized, and logged.
-- Reproducibility matters even inside a single notebook.
-- Functions inside the notebook are a practical bridge between exploration and production.
+- `data.path`: CSV path for dataset (relative to repo root). If missing the loader will create a synthetic CSV.
+- `data.target_column`: name of the outcome column (e.g., `churn`).
+- `data.test_size`: float (0–1) fraction used for the test set.
+- `data.random_state`: RNG seed for reproducibility.
+- `model.type`: currently supports `logistic_regression`.
+- `model.max_iter`: hyperparameter for `LogisticRegression`.
+- `paths.model_path`, `paths.report_path`, `paths.log_path`: where artifacts and logs are written.
 
----
-
-## ❓ Quiz Questions
-
-1. Why do notebooks still need structure even when they are not deployed as scripts?
-2. What does the Single Responsibility Principle mean in a notebook workflow?
-3. Why is a config dictionary useful during model training?
-4. What is the difference between `print()` and `logging`?
-5. Why is it important to save model artifacts and metrics?
+Edit these values to demonstrate repeatable experiments and to teach configuration-driven workflows.
 
 ---
 
-## 📖 Further Reading
+## File responsibilities (walk students through these)
 
-- [Google Production ML Systems Overview](https://developers.google.com/machine-learning/crash-course/production-ml-systems)
-- [scikit-learn Model Persistence](https://scikit-learn.org/stable/modules/model_persistence.html)
-- [Python Logging Guide](https://docs.python.org/3/library/logging.html)
+- `data_loader.py`: ensures the dataset exists (creates synthetic data) and returns train/test splits — shows data acquisition and validation.
+- `features.py`: demonstrates simple but realistic preprocessing (imputation and one-hot encoding) — shows separation of feature engineering.
+- `train.py`: encapsulates model selection and fitting; `save_model` persists the model.
+- `evaluate.py`: computes standard classification metrics and writes a JSON report.
+- `main.py`: wires everything together and configures logging; this is the user-facing CLI for reproducible runs.
+
+---
+
+## Teaching notes and demo flow
+
+1. Open `scripts/config.yaml` and explain each section (data, model, paths).
+2. Show `data_loader.py` and run it in a REPL to inspect the generated dataset columns.
+3. Run `python scripts/main.py` once to produce `artifacts/` and show the saved model + metrics.
+4. Change a config value (e.g., `test_size` or `max_iter`) and re-run to show reproducibility and impact on metrics.
+5. Optional: ask students to implement a second model (RandomForest) in `train.py` and compare.
+
+---
+
+## Troubleshooting
+
+- If you see `ModuleNotFoundError`, install missing packages: `pip install -r requirements.txt` or `pip install <package>`.
+- If `target_column` not found in CSV, open the CSV (path in `config.yaml`) to inspect headers.
+- Logs are written to the path set in `paths.log_path` — tail that file to follow progress.
+
+---
+
+## Suggested follow-ups (I can add these)
+- `run_demo.bat` and `run_demo.sh` wrappers for Windows/macOS-Linux.
+- A short `explain.md` with talking points and slide notes for instructors.
+- Add example contents of `artifacts/` committed to the repo so students can inspect outputs without running.
+
+If you want, I can add the run wrappers and a 1-page instructor cheat-sheet next — which would you prefer?
