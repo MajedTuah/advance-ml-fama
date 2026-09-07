@@ -1,0 +1,27 @@
+# job_config.yml — YAML-based job definition (alternative to Python SDK)
+# Submit with: az ml job create --file job_config.yml
+
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+
+display_name: credit-model-training-v1
+experiment_name: credit-default-model
+description: Train GradientBoostingClassifier on credit default dataset
+
+code: ../scripts
+command: >
+  python train.py
+  --learning-rate 0.05
+  --max-depth 5
+  --n-estimators 200
+  --min-samples-split 20
+
+environment: azureml:credit-model-env:1
+compute: azureml:cpu-cluster
+
+resources:
+  instance_count: 1
+
+tags:
+  framework: sklearn
+  session: "10"
+  topic: cloud-training-experiment
