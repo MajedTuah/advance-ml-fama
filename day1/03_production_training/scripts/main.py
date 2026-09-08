@@ -31,7 +31,7 @@ def configure_logging(log_path: str):
 
 def main():
     parser = argparse.ArgumentParser(description="Train a modular ML model.")
-    parser.add_argument("--config", default="scripts/config.yaml", help="Path to YAML config file")
+    parser.add_argument("--config", default="advance-ml-fama\\day1\\03_production_training\\scripts\\config.yaml", help="Path to YAML config file")
     args = parser.parse_args()
 
     config = load_config(args.config)

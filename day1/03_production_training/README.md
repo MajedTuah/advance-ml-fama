@@ -51,7 +51,7 @@ pip install pandas scikit-learn joblib pyyaml
 Run the orchestrator from the repo root:
 
 ```bash
-python day1/03_production_training/scripts/main.py --config day1/03_production_training/scripts/config.yaml
+python C:\Users\majed\OneDrive\Documents\fama-proj\advance-ml-fama\day1\03_production_training\scripts\main.py --configC:\Users\majed\OneDrive\Documents\fama-proj\advance-ml-fama\day1\03_production_training\scripts\config.yaml
 ```
 
 Default behaviour:

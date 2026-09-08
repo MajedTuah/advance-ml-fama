@@ -3,7 +3,7 @@
   "precision": 0.6666666666666666,
   "recall": 0.45714285714285713,
   "f1": 0.5423728813559322,
-  "report": {
+  "classification_report": {
     "0": {
       "precision": 0.75,
       "recall": 0.8769230769230769,
