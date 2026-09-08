@@ -80,29 +80,32 @@ def context_items(source, section, topic, labels):
 def is_setup_cell(source):
     """Keep imports, configuration, and data-loading cells runnable."""
     text = source.lower()
-    exercise_markers = (
-        "plt.", "sns.", "matplotlib", "seaborn", "patches", "plotly",
-        "fit(", "predict", "evaluate", "classification_report", "roc_auc",
-        "train_test_split", "timeseriessplit", "cross_val", "optuna", "mlflow",
-        "shap_values", "lime_tabular", "isolationforest", "calculate_psi",
-        "command(", "sweep", "ml_client", "submit", "register", "dashboard",
-        "confusion_matrix", "roc_curve", "precision_recall", "gridsearch",
-    )
-    if any(marker in text for marker in exercise_markers):
-        return False
-
     meaningful = [
         line.strip() for line in source.splitlines()
         if line.strip() and not line.strip().startswith("#")
     ]
     if not meaningful:
         return True
-    setup_markers = (
-        "import ", "from ", "pip install", "read_csv", "read_excel",
-        "read_json", "path(", "os.environ", "random.seed", "np.random.seed",
-        "set_option", "warnings.", "logging.", "load_dotenv",
+    if all(line.startswith(("import ", "from ", "!pip ", "%pip ")) for line in meaningful):
+        return True
+
+    action_text = "\n".join(
+        line for line in meaningful
+        if not line.startswith(("import ", "from ", "!pip ", "%pip "))
+    ).lower()
+    exercise_markers = (
+        "plt.figure", "plt.subplots", "plt.plot", "plt.scatter", "plt.bar",
+        "plt.show", "sns.heatmap", "sns.scatter", "ax.", "fig,",
+        "fit(", "predict", "evaluate", "classification_report", "roc_auc",
+        "train_test_split", "timeseriessplit", "cross_val", "optuna", "mlflow",
+        "shap_values", "lime_tabular", "isolationforest", "calculate_psi",
+        "command(", "sweep", "ml_client", "mlclient", "submit", "register", "dashboard",
+        "confusion_matrix", "roc_curve", "precision_recall", "gridsearch",
+        "randomforest", "logisticregression", "xgbclassifier", "pipeline(",
     )
-    return all(any(marker in line.lower() for marker in setup_markers) for line in meaningful)
+    if any(marker in action_text for marker in exercise_markers):
+        return False
+    return True
 
 
 def baseline_notebook(path):
@@ -192,5 +195,9 @@ for path in sorted(ROOT.rglob("*.ipynb")):
                     "execution_count": None,
                     "outputs": [],
                 })
+        else:
+            metadata = cell.setdefault("metadata", {})
+            metadata.setdefault("id", cell.get("id", f"teaching-{index + 1:03d}"))
+            metadata.setdefault("language", "markdown")
     path.write_text(json.dumps(notebook, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(path)

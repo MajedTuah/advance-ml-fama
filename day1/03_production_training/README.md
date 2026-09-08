@@ -32,9 +32,19 @@ By the end of this session learners will be able to:
 From the repository root create and activate a virtual environment and install dependencies:
 
 ```bash
+# If `python` is not found, try `py -m venv .venv` on Windows
 python -m venv .venv
-.\\.venv\\Scripts\\activate   # Windows PowerShell / CMD
-# or on macOS/Linux: source .venv/bin/activate
+
+# Windows PowerShell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+
+# Windows Command Prompt
+# .\.venv\Scripts\activate.bat
+
+# macOS/Linux:
+# source .venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
