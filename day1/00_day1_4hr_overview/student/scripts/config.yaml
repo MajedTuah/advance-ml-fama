@@ -1,0 +1,15 @@
+data:
+  target_column: churn
+  test_size: 0.2
+  random_state: 42
+  path: data/production_training_sample.csv
+
+model:
+  type: logistic_regression
+  random_state: 42
+  max_iter: 500
+
+paths:
+  model_path: artifacts/model.joblib
+  report_path: artifacts/metrics.json
+  log_path: artifacts/training.log

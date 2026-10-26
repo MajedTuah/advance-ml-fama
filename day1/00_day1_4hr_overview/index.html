@@ -553,7 +553,7 @@
     </div>
   </div>
   <div class="sfoot"><span>INTRO · 0:00–0:15</span><span></span></div>
-  <template class="notes">Walk left to right in under a minute. The bar is proportional to time. If the venue needs a break, take 5 minutes from Optuna (15 trials instead of 30) and 5 from the dashboard.</template>
+  <template class="notes">Walk left to right in under a minute. The bar is proportional to time. If the venue needs a break, take 5 minutes from Optuna (10 trials instead of 20) and 5 from the dashboard.</template>
 </section>
 
 <section class="slide" data-title="Why this programme">
@@ -619,7 +619,7 @@
     </article>
   </div>
   <div class="sfoot"><span>INTRO · 0:07–0:12 · ACTIVITY</span><span></span></div>
-  <template class="notes">5 minutes. Run the vote before saying anything about the answer. The expected vote is B. Our own Session 02 notebook produces this pattern: 99.2% accuracy and 0 of 2 test defaults caught. Choose recall, precision or PR-AUC when defaults are rare.</template>
+  <template class="notes">5 minutes. Run the vote before saying anything about the answer. The expected vote is B. Part C of notebooks/01_trustworthy_data.ipynb shows it on our own loan book: 'always predict no default' scores 90.5% accuracy and 0% recall. Choose recall, precision or PR-AUC when defaults are rare.</template>
 </section>
 
 <section class="slide" data-title="The case study">
@@ -628,8 +628,8 @@
   <div class="body">
     <div class="grid4" id="lifecycle"></div>
     <div class="banner anim" style="--d:4;display:flex;justify-content:space-between;align-items:center;gap:12px">
-      <span><b>ENVIRONMENT.</b> Python 3.11, Git, Docker Desktop, repo cloned from the students branch. Open <span style="color:var(--code)">day1/01_ai_ml_dl_llm_landscape/ai_ml_landscape_student.ipynb</span> and run cell 1.</span>
-      <button class="copy" data-copy="cd advance-ml-fama && jupyter lab">Copy</button>
+      <span><b>ENVIRONMENT.</b> Python 3.11, Git, Docker Desktop, <span style="color:var(--code)">4Hour_Session</span> repo cloned and set up. Open <span style="color:var(--code)">notebooks/00_environment_check.ipynb</span> and run it.</span>
+      <button class="copy" data-copy="cd 4Hour_Session && jupyter lab">Copy</button>
     </div>
   </div>
   <div class="sfoot"><span>INTRO · 0:12–0:15</span><span></span></div>
@@ -736,8 +736,8 @@
   <h1 class="anim"><i class="bar"></i>Activity: would you know this at approval?</h1>
   <p class="sub anim">Classify all 12 columns. The feedback line explains the last one you touched.</p>
   <div class="body" id="mount-leak"></div>
-  <div class="sfoot"><span>MODULE 1 · ACTIVITY · 15 min · then open the Session 02 notebook</span><span></span></div>
-  <template class="notes">8 minutes alone, 3 minutes in pairs, then reveal. Target column is defaulted_in_next_30_days, 1,200 loans, about 0.7% defaults. Known notebook issue: one leaky-model cell raises a NaN error, and the clean AUC is meaningless because there are only about 8 defaults. Use that to talk about rare classes, not as a benchmark.</template>
+  <div class="sfoot"><span>MODULE 1 · ACTIVITY · 15 min · then notebooks/01_trustworthy_data.ipynb</span><span></span></div>
+  <template class="notes">8 minutes alone, 3 minutes in pairs, then reveal. Participants record their calls in part B of notebooks/01_trustworthy_data.ipynb, which scores them and explains every non-SAFE column. The loan book has 2,000 loans and about 9% defaults, so the clean model in part D reaches a ROC-AUC near 0.76 on the newest 20%, against 1.000 for the leaky one.</template>
 </section>
 
 <section class="slide" data-title="Leak lightning" data-activity="game-leak" data-label="Game · Leak lightning">
@@ -790,7 +790,7 @@
 
 <section class="slide" data-title="The Pipeline">
   <h1 class="anim"><i class="bar"></i>One object, fitted on training rows only</h1>
-  <p class="sub anim">day1/02_data_quality_leakage/notebook.ipynb</p>
+  <p class="sub anim">notebooks/01_trustworthy_data.ipynb · part D</p>
   <div class="body split">
     <pre class="code anim" style="--d:1">df = df.sort_values("loan_approval_date")
 cut = int(len(df) * 0.8)          <span class="cm"># oldest 80% trains</span>
@@ -827,7 +827,7 @@ model.fit(train[num + cat], train["defaulted_in_next_30_days"])</pre>
   <p class="sub anim">Blue is train. Orange is the fold you score.</p>
   <div class="body grid3" id="folds"></div>
   <div class="sfoot"><span>MODULE 1 · 0:50–1:10</span><span></span></div>
-  <template class="notes">For this loan book: TimeSeriesSplit while tuning, then a final holdout of the newest 20%. If customers repeat, keep every loan of one customer on one side. The Session 02 notebook draws TimeSeriesSplit if you want it on screen.</template>
+  <template class="notes">For this loan book: TimeSeriesSplit while tuning, then a final holdout of the newest 20%. If customers repeat, keep every loan of one customer on one side. Part E of notebooks/01_trustworthy_data.ipynb runs TimeSeriesSplit cross-validation if you want it on screen.</template>
 </section>
 
 <section class="slide" data-title="Pick the split" data-activity="split" data-label="Pick the split">
@@ -880,7 +880,7 @@ model.fit(train[num + cat], train["defaulted_in_next_30_days"])</pre>
 
 <section class="slide" data-title="Modular scripts">
   <h1 class="anim"><i class="bar"></i>From notebook to modular scripts</h1>
-  <p class="sub anim">day1/03_production_training/scripts · one responsibility per file</p>
+  <p class="sub anim">scripts/ · one responsibility per file</p>
   <div class="body">
     <div class="grid3 anim" style="--d:1">
       <article class="card" style="text-align:center"><h3 style="color:var(--orange)">config.yaml</h3><p style="color:var(--muted)">data · model · paths</p></article>
@@ -925,11 +925,11 @@ paths:
   report_path: artifacts/metrics.json
   log_path: artifacts/training.log</pre>
     <div class="anim" style="--d:2">
-      <pre class="code">python day1/03_production_training/scripts/main.py \
-  --config day1/03_production_training/scripts/config.yaml
+      <pre class="code">python scripts/main.py \
+  --config scripts/config.yaml
 <span class="gn">INFO | Starting training workflow
 INFO | Training complete. Metrics: {...}</span></pre>
-      <div class="row" style="margin-top:8px"><button class="copy" data-copy="python day1/03_production_training/scripts/main.py --config day1/03_production_training/scripts/config.yaml">Copy command</button></div>
+      <div class="row" style="margin-top:8px"><button class="copy" data-copy="python scripts/main.py --config scripts/config.yaml">Copy command</button></div>
       <div class="grid2" style="margin-top:10px">
         <article class="card2"><b style="color:var(--orange)">Config, not code</b><p style="color:var(--muted);font-size:13px">Change behaviour without editing Python.</p></article>
         <article class="card2"><b style="color:var(--cyan)">Fixed seeds</b><p style="color:var(--muted);font-size:13px">random_state: 42 everywhere.</p></article>
@@ -977,7 +977,7 @@ INFO | Training complete. Metrics: {...}</span></pre>
 
 <section class="slide" data-title="Optuna">
   <h1 class="anim"><i class="bar"></i>Hands-on: tuning with Optuna</h1>
-  <p class="sub anim">day1/04_hyperparameter_optim/notebook.ipynb · 30 trials, or 15 on a slow laptop</p>
+  <p class="sub anim">notebooks/02_train_tune_track.ipynb · 20 trials, or 10 on a slow laptop</p>
   <div class="body split">
     <pre class="code anim" style="--d:1">def objective(trial):
     params = {
@@ -988,11 +988,11 @@ INFO | Training complete. Metrics: {...}</span></pre>
     clf = RandomForestClassifier(**params, random_state=42)
     <span class="cm"># validation folds, never the test set</span>
     scores = cross_val_score(
-        clf, X_train, y_train, cv=5, scoring="roc_auc")
+        clf, X_train, y_train, cv=3, scoring="roc_auc")
     return scores.mean()
 
 study = optuna.create_study(direction="maximize")
-study.optimize(objective, n_trials=30)
+study.optimize(objective, n_trials=20)
 print(study.best_params, round(study.best_value, 3))</pre>
     <div class="anim" style="--d:2;display:flex;flex-direction:column;gap:8px">
       <article class="card2"><b style="color:var(--cyan)">Trial</b><p style="color:var(--muted);font-size:14px">One evaluation of one set of hyperparameters.</p></article>
@@ -1002,7 +1002,7 @@ print(study.best_params, round(study.best_value, 3))</pre>
     </div>
   </div>
   <div class="sfoot"><span>MODULE 2 · HANDS-ON · about 10 min</span><span></span></div>
-  <template class="notes">While it runs, ask why cross_val_score and not the test set. Stretch: plot_param_importances(study) shows which hyperparameter mattered. Reduce n_trials to 15 on slow machines.</template>
+  <template class="notes">While it runs, ask why cross_val_score and not the test set. Stretch: plot_param_importances(study) shows which hyperparameter mattered. The notebook plots the parameter importances right after the study. Reduce N_TRIALS to 10 on slow machines.</template>
 </section>
 
 <section class="slide" data-title="MLflow">
@@ -1016,8 +1016,8 @@ print(study.best_params, round(study.best_value, 3))</pre>
         <article class="card2"><b style="color:var(--orange)">ARTEFACTS</b><p style="font-size:13px;color:var(--muted)">model, plots, metrics.json</p></article>
         <article class="card2"><b style="color:var(--indigo)">TAGS</b><p style="font-size:13px;color:var(--muted)">git commit, data version, owner</p></article>
       </div>
-      <pre class="code" style="margin-top:10px">mlflow.set_experiment("Bootcamp_Optuna_Experiments")
-with mlflow.start_run(run_name="Best_RF_Model"):
+      <pre class="code" style="margin-top:10px">mlflow.set_experiment("day1_loan_default")
+with mlflow.start_run(run_name="optuna_best_rf"):
     mlflow.log_params(study.best_params)
     best = RandomForestClassifier(
         **study.best_params, random_state=42)
@@ -1164,7 +1164,7 @@ shap.waterfall_plot(shap.Explanation(
     data=X_test.iloc[0]))</pre>
   </div>
   <div class="sfoot"><span>MODULE 3 · TreeExplainer is exact and fast for tree models</span><span></span></div>
-  <template class="notes">TreeExplainer runs in polynomial time for tree ensembles, so it is the default for a random forest or gradient boosting model. Participants run the SHAP cells in day1/05_explainability_xai/notebook.ipynb.</template>
+  <template class="notes">TreeExplainer runs in polynomial time for tree ensembles, so it is the default for a random forest or gradient boosting model. Participants run part A of notebooks/03_explain_and_monitor.ipynb; applicant 0 there is the one on the next slide.</template>
 </section>
 
 <section class="slide" data-title="Global and local SHAP">
@@ -1241,7 +1241,7 @@ shap.waterfall_plot(shap.Explanation(
     <article class="card anim" style="--d:3"><h3 style="color:var(--red)">Label drift</h3><p class="card2" style="color:var(--red);font-family:ui-monospace,Menlo,monospace">P(y) changes</p><p style="color:var(--white);margin-top:8px">The outcome rate shifts.</p><p style="color:var(--muted);margin-top:6px">The default rate doubles from 3% to 6% in a downturn.</p><p class="lab"><span>DETECT</span>Predicted default rate against the realised rate.</p></article>
   </div>
   <div class="sfoot"><span>MODULE 3 · 2:35–2:50</span><span></span></div>
-  <template class="notes">Feature drift can be measured today. Concept drift needs labels, and loan defaults take months to arrive. That delay is why input monitoring matters. Notebook: day1/06_data_drift_anomaly/notebook.ipynb.</template>
+  <template class="notes">Feature drift can be measured today. Concept drift needs labels, and loan defaults take months to arrive. That delay is why input monitoring matters. Notebook: part C of notebooks/03_explain_and_monitor.ipynb.</template>
 </section>
 
 <section class="slide" data-title="Drift triage" data-activity="drift" data-label="Drift triage">
@@ -1287,7 +1287,7 @@ shap.waterfall_plot(shap.Explanation(
   <p class="sub anim">Stable under 0.10 · watch from 0.10 · alert at 0.20. Then build the same table in the notebook.</p>
   <div class="body" id="mount-psi"></div>
   <div class="sfoot"><span>MODULE 3 · ACTIVITY · the PSI table is half the checkpoint</span><span></span></div>
-  <template class="notes">Participants then build this table in the Session 06 notebook: simulate a shift, compute PSI and KS per feature, flag ALERT and WATCH. Checkpoint artefact: a PSI table with drifted features flagged, plus the written explanation from the previous activity.</template>
+  <template class="notes">Participants then build this table in part C of notebooks/03_explain_and_monitor.ipynb (same simulation, so the numbers match): simulate a shift, compute PSI and KS per feature, flag ALERT and WATCH. Checkpoint artefact: a PSI table with drifted features flagged, plus the written explanation from the previous activity.</template>
 </section>
 
 <section class="slide" data-title="PSI slap" data-activity="game-psi" data-label="Game · PSI slap">
@@ -1381,7 +1381,7 @@ flags = iso.predict(X_new)   <span class="cm"># -1 is an anomaly</span></pre>
 
 <section class="slide" data-title="FastAPI">
   <h1 class="anim"><i class="bar"></i>FastAPI and Pydantic</h1>
-  <p class="sub anim">day1/07_api_serving_containers/app/main.py</p>
+  <p class="sub anim">api/main.py</p>
   <div class="body split">
     <pre class="code anim" style="--d:1">class PredictRequest(BaseModel):
     age: int = Field(..., ge=18, le=120)
@@ -1423,7 +1423,7 @@ async def predict(req: PredictRequest):
   <p class="sub anim">POST /v1/predict with this body. What comes back? Keys 1, 2 and 3.</p>
   <div class="body game" id="game-status"></div>
   <div class="sfoot"><span>MODULE 4 · GAME · about 3 min</span><span></span></div>
-  <template class="notes">Based on PredictRequest in day1/07_api_serving_containers/app/main.py: age ge=18 le=120, income gt=0, credit_score ge=300 le=850, all required. Two surprises: an undeclared extra field passes, because Pydantic ignores extras by default (use extra='forbid' to reject them), and the string '35' would be coerced to an int while 'thirty-five' fails.</template>
+  <template class="notes">Based on PredictRequest in api/main.py: age ge=18 le=120, income gt=0, credit_score ge=300 le=850, all required. Two surprises: an undeclared extra field passes, because Pydantic ignores extras by default (use extra='forbid' to reject them), and the string '35' would be coerced to an int while 'thirty-five' fails.</template>
 </section>
 
 <section class="slide" data-title="Docker lab" data-activity="docker" data-label="Docker lab">
@@ -1457,7 +1457,7 @@ CMD ["uvicorn", "main:app",
   <h1 class="anim"><i class="bar"></i>The six-panel MLOps dashboard</h1>
   <p class="sub anim">Four pillars: model, data, system, business. Figures are illustrative.</p>
   <div class="body dash" id="dash"></div>
-  <div class="sfoot"><span>MODULE 4 · 3:20–3:35 · notebook day1/08_mlops_dashboard</span><span></span></div>
+  <div class="sfoot"><span>MODULE 4 · 3:20–3:35 · notebooks/04_serve_and_monitor.ipynb, part C</span><span></span></div>
   <template class="notes">Read it as one story. AUC is sliding toward the SLO line, the predicted default rate is rising, and credit utilisation PSI is in alert. That matches the drift from Module 3. Latency spiked and stayed inside its SLO. Values are illustrative.</template>
 </section>
 
@@ -1840,7 +1840,7 @@ function wireText(ids, key, statusId, minEach, minCount) {
 
 function wireDocker() {
   const cmd = [
-    "cd day1/07_api_serving_containers/app",
+    "cd api",
     "docker build -t loan-api:1.0 .",
     "docker run -d -p 8000:8000 --name loan-api loan-api:1.0",
     "curl -X POST http://localhost:8000/v1/predict \\",
